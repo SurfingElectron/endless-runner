@@ -32,6 +32,14 @@ def game_start_splash():
     else:
         display_score('High Score:', 400, 350)
 
+
+def change_obstacle_index(index):
+    if index == 0:
+        index = 1
+    else:
+        index = 0
+    return index
+
 def obstacle_movement(obstacles):
     if obstacles:
         for obstacle in obstacles:
@@ -86,7 +94,7 @@ player_gravity = 0
 sky_surf = pygame.image.load('assets/sky.png').convert()
 ground_surf = pygame.image.load('assets/ground.png').convert()
 
-# Player surfaces / rects / lists for animation
+# Player surfaces / rects / variables & lists for animation
 player_stand = pygame.transform.rotozoom((pygame.image.load('assets/player/player_stand.png')), 0, 2)
 player_stand_rect = player_stand.get_rect(center = (400, 200))
 
@@ -94,41 +102,64 @@ player_jump = pygame.image.load('assets/player/player_jump.png').convert_alpha()
 
 player_walk_1 = pygame.image.load('assets/player/player_walk_1.png').convert_alpha()
 player_walk_2 = pygame.image.load('assets/player/player_walk_2.png').convert_alpha()
-player_walk = [player_walk_1, player_walk_2]
 player_walk_index = 0
+player_walk = [player_walk_1, player_walk_2]
 player_surf = player_walk[player_walk_index]
 player_rect = player_surf.get_rect(midbottom = (80, 300))
 
-# Obstacle surfaces / timers
-snail_surf = pygame.image.load('assets/snail/snail_1.png').convert_alpha()
-fly_surf = pygame.image.load('assets/fly/fly_1.png').convert_alpha()
+# Obstacle surfaces / variables & lists for animation
+snail_frame_1 = pygame.image.load('assets/snail/snail_1.png').convert_alpha()
+snail_frame_2 = pygame.image.load('assets/snail/snail_2.png').convert_alpha()
+snail_frames = [snail_frame_1, snail_frame_2]
+snail_frame_index = 0
+snail_surf = snail_frames[snail_frame_index]
 
+fly_frame_1 = pygame.image.load('assets/fly/fly_1.png').convert_alpha()
+fly_frame_2 = pygame.image.load('assets/fly/fly_2.png').convert_alpha()
+fly_frames = [fly_frame_1, fly_frame_2]
+fly_frame_index = 0
+fly_surf = fly_frames[fly_frame_index]
+
+# Obstacle timers
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500)
 obstacle_rect_list = []
 
+snail_animation_timer = pygame.USEREVENT + 2
+pygame.time.set_timer(snail_animation_timer, 500)
+
+fly_animation_timer = pygame.USEREVENT + 3
+pygame.time.set_timer(fly_animation_timer, 200)
+
 # Game loop
 while True:
 
-    # Check for user inputs
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
 
-        if game_active:    
+        if game_active:
+            # Check user inputs    
             if event.type == pygame.KEYDOWN and player_rect.bottom >= 300:
                 if event.key == pygame.K_SPACE:
                     player_gravity = -20
             if event.type == pygame.MOUSEBUTTONDOWN and player_rect.bottom >= 300:
                 if player_rect.collidepoint(event.pos):
                     player_gravity = -20
+
+            # Check timers        
             if event.type == obstacle_timer:
-                # randint (0,2) generates 0 or 1 - evaluates to True/False
-                if randint(0,2):
+                if randint(0,2): # generates 0 or 1 - evaluates to True/False
                     obstacle_rect_list.append(snail_surf.get_rect(midbottom = (randint(900, 1100), 300)))
                 else:
                     obstacle_rect_list.append(fly_surf.get_rect(midbottom = (randint(900, 1100), 210)))
+            if event.type == snail_animation_timer:
+                snail_frame_index = change_obstacle_index(snail_frame_index)
+                snail_surf = snail_frames[snail_frame_index]
+            if event.type == fly_animation_timer:
+                fly_frame_index = change_obstacle_index(fly_frame_index)
+                fly_surf = fly_frames[fly_frame_index]
             
         else:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
