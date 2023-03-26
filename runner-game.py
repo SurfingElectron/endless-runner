@@ -19,10 +19,13 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom = (80, 300))
         self.gravity = 0
 
+        self.jump_sound = pygame.mixer.Sound('audio/effects/player_jump.wav')
+
     def input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.bottom >= 300:
             self.gravity = -20
+            self.jump_sound.play()
 
     def apply_gravity(self):
         self.gravity += 1
@@ -125,7 +128,6 @@ def game_start_splash():
         display_score('High Score:', 400, 350)
 
 
-
 # LET'S GOOOOOO
 pygame.init()
 screen = pygame.display.set_mode((800, 400))
@@ -138,6 +140,15 @@ game_active = False
 start_time = 0
 score = 0
 
+# Timers
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 1500)
+
+# Music
+pygame.mixer.music.load('audio/music/music_game.wav')
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.25)
+
 # Sprite Groups
 player = pygame.sprite.GroupSingle()
 player.add(Player()) 
@@ -148,10 +159,6 @@ obstacle_group = pygame.sprite.Group()
 sky_surf = pygame.image.load('assets/sky.png').convert()
 ground_surf = pygame.image.load('assets/ground.png').convert()
 
-# Obstacle timers
-obstacle_timer = pygame.USEREVENT + 1
-pygame.time.set_timer(obstacle_timer, 1500)
-obstacle_rect_list = []
 
 # Game loop
 while True:
